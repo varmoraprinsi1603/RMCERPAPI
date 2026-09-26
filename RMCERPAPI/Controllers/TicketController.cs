@@ -724,5 +724,197 @@ namespace RMCERPAPI.Controllers
                 });
             }
         }
+
+
+        // =========================================================
+        // GetTicketPerformanceReport
+        // =========================================================
+
+        [HttpGet]
+        [Authorize(Roles = "Admin,Support Executive,User")]
+        public IActionResult GetTicketPerformanceReport(
+    DateTime? FromDate = null,
+    DateTime? ToDate = null,
+    string Status = null,
+    string Priority = null,
+    string AssignedToName = null)
+        {
+            try
+            {
+                var data = _ticketRepository.GetTicketPerformanceReport(
+                    FromDate,
+                    ToDate,
+                    Status,
+                    Priority,
+                    AssignedToName
+                );
+
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = 0,
+                    Message = $"Error getting Ticket Performance Report: {ex.Message}"
+                });
+            }
+        }
+
+        // =========================================================
+        // EXPORT TICKET PERFORMANCE TO EXCEL
+        // =========================================================
+        [HttpGet]
+        [Authorize(Roles = "Admin,Support Executive,User")]
+        public IActionResult ExportTicketPerformanceExcel(
+            DateTime? FromDate = null,
+            DateTime? ToDate = null,
+            string Status = null,
+            string Priority = null,
+            string AssignedToName = null)
+        {
+            try
+            {
+                var data = _ticketRepository.GetTicketPerformanceReport(
+                    FromDate,
+                    ToDate,
+                    Status,
+                    Priority,
+                    AssignedToName
+                );
+
+                using (var workbook = new ClosedXML.Excel.XLWorkbook())
+                {
+                    var worksheet =
+                        workbook.Worksheets.Add("Ticket Performance");
+
+                    // =========================
+                    // Headers
+                    // =========================
+                    worksheet.Cell(1, 1).Value =
+                        "Support Executive";
+
+                    worksheet.Cell(1, 2).Value =
+                        "Total Assigned";
+
+                    worksheet.Cell(1, 3).Value =
+                        "Resolved";
+
+                    worksheet.Cell(1, 4).Value =
+                        "Pending";
+
+                    worksheet.Cell(1, 5).Value =
+                        "Average Resolution Time";
+
+                    // =========================
+                    // Header Styling
+                    // =========================
+                    var headerRange =
+                        worksheet.Range(1, 1, 1, 5);
+
+                    headerRange.Style.Font.Bold = true;
+
+                    headerRange.Style.Alignment.Horizontal =
+                        ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+
+                    headerRange.Style.Alignment.Vertical =
+                        ClosedXML.Excel.XLAlignmentVerticalValues.Center;
+
+                    int row = 2;
+
+                    // =========================
+                    // Data
+                    // =========================
+                    foreach (var item in data)
+                    {
+                        worksheet.Cell(row, 1).Value =
+                            item.SupportExecutive ?? "";
+
+                        worksheet.Cell(row, 2).Value =
+                            item.TotalAssigned;
+
+                        worksheet.Cell(row, 3).Value =
+                            item.Resolved;
+
+                        worksheet.Cell(row, 4).Value =
+                            item.Pending;
+
+                        if (item.AverageResolutionTimeHours != null)
+                        {
+                            worksheet.Cell(row, 5).Value =
+                                item.AverageResolutionTimeHours;
+
+                            worksheet.Cell(row, 5)
+                                .Style.NumberFormat.Format =
+                                "0.00";
+                        }
+                        else
+                        {
+                            worksheet.Cell(row, 5).Value =
+                                "";
+                        }
+
+                        row++;
+                    }
+
+                    // =========================
+                    // Column Widths
+                    // =========================
+                    worksheet.Column(1).Width = 25;
+                    worksheet.Column(2).Width = 18;
+                    worksheet.Column(3).Width = 15;
+                    worksheet.Column(4).Width = 15;
+                    worksheet.Column(5).Width = 28;
+
+                    // =========================
+                    // Alignment
+                    // =========================
+                    worksheet.Range(
+                        1,
+                        2,
+                        row - 1,
+                        5
+                    ).Style.Alignment.Horizontal =
+                        ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+
+                    worksheet.Range(
+                        1,
+                        1,
+                        row - 1,
+                        5
+                    ).Style.Alignment.Vertical =
+                        ClosedXML.Excel.XLAlignmentVerticalValues.Center;
+
+                    // =========================
+                    // Row Height
+                    // =========================
+                    worksheet.Rows().AdjustToContents();
+
+                    using (var stream = new MemoryStream())
+                    {
+                        workbook.SaveAs(stream);
+
+                        var content = stream.ToArray();
+
+                        return File(
+                            content,
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            "TicketPerformance.xlsx"
+                        );
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = 0,
+                    Message =
+                        $"Error exporting Ticket Performance: {ex.Message}"
+                });
+            }
+        }
+
+
     }
 }

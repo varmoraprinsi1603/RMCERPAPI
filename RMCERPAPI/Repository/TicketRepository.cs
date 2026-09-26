@@ -331,5 +331,40 @@ namespace RMCERPAPI.Repository
                 ).ToList();
             }
         }
+
+        // =========================================================
+        // Ticket Performance Report Data
+        // =========================================================
+
+    public List<dynamic> GetTicketPerformanceReport(
+    DateTime? FromDate,
+    DateTime? ToDate,
+    string Status,
+    string Priority,
+    string AssignedToName)
+        {
+            using (IDbConnection connection = OpenConnection())
+            {
+                string sql = "ProcReportTicketPerformance";
+
+                var param = new
+                {
+                    FromDate = FromDate,
+                    ToDate = ToDate,
+                    Status = Status,
+                    Priority = Priority,
+                    AssignedToName = AssignedToName
+                };
+
+                return connection.Query(
+                    sql,
+                    param,
+                    null,
+                    true,
+                    2000,
+                    CommandType.StoredProcedure
+                ).ToList();
+            }
+        }
     }
 }
