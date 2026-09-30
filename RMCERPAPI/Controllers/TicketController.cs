@@ -334,7 +334,7 @@ namespace RMCERPAPI.Controllers
         // 8. Get Support Executives
         // =========================================
         [HttpGet]
-        [Authorize(Roles = "Admin,Support Executive")]
+        [Authorize(Roles = "Admin,Support Executive,User")]
         public IActionResult GetSupportExecutives()
         {
             try

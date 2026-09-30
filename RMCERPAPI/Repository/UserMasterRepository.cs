@@ -180,6 +180,7 @@ namespace RMCERPAPI.Repository
                     PrcType = 5,
                     UserID = model.UserID,
                     UserName = model.UserName,
+                    Password = model.Password,
                     Name = model.Name,
                     EmailID = model.EmailID,
                     Mobile = model.Mobile,
@@ -238,6 +239,31 @@ namespace RMCERPAPI.Repository
                 var param = new
                 {
                     PrcType = 7
+                };
+
+                return connection.Query<UserMasterModel>(
+                    sql,
+                    param,
+                    null,
+                    true,
+                    2000,
+                    CommandType.StoredProcedure
+                ).ToList();
+            }
+        }
+
+        // =========================
+        // GET ACTIVE SUPPORT EXECUTIVES
+        // =========================
+        public List<UserMasterModel> GetSupportExecutives()
+        {
+            using (IDbConnection connection = OpenConnection())
+            {
+                string sql = "ProcUserMaster";
+
+                var param = new
+                {
+                    PrcType = 8
                 };
 
                 return connection.Query<UserMasterModel>(

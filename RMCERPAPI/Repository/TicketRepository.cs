@@ -85,6 +85,7 @@ namespace RMCERPAPI.Repository
                     Remarks = model.Remarks,
                     OtherRemarks = model.OtherRemarks,
                     AssignBy = model.AssignBy,
+                    AssignedTo = model.AssignedTo,
                     AssignByName = model.AssignByName,
                     AssignedToName = model.AssignedToName,
                 };
