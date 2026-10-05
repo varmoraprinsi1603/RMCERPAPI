@@ -4,6 +4,8 @@ using RMCERPAPI.Models;
 using RMCERPAPI.Repository;
 using System;
 using System.IO;
+using RMCERPAPI.Services;
+using System.Threading.Tasks;
 
 namespace RMCERPAPI.Controllers
 {
@@ -13,11 +15,15 @@ namespace RMCERPAPI.Controllers
     public class TicketController : ControllerBase
     {
         private readonly TicketRepository _ticketRepository;
+        private readonly EmailService _emailService;
 
-        public TicketController(TicketRepository ticketRepository)
+        public TicketController(
+            TicketRepository ticketRepository,
+            EmailService emailService)
         {
             _ticketRepository = ticketRepository;
-        }
+            _emailService = emailService;
+        } 
 
 
         // =========================================
@@ -47,6 +53,66 @@ namespace RMCERPAPI.Controllers
             }
         }
 
+
+        // =========================================
+        // Send Ticket Mail
+        // =========================================
+        [HttpPost]
+        public async Task<IActionResult> SendTicketMail(
+            string ToEmail,
+            string Subject,
+            string Body)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(ToEmail))
+                {
+                    return BadRequest(new
+                    {
+                        Status = 0,
+                        Message = "Email ID is required."
+                    });
+                }
+
+                if (string.IsNullOrWhiteSpace(Subject))
+                {
+                    return BadRequest(new
+                    {
+                        Status = 0,
+                        Message = "Email subject is required."
+                    });
+                }
+
+                if (string.IsNullOrWhiteSpace(Body))
+                {
+                    return BadRequest(new
+                    {
+                        Status = 0,
+                        Message = "Email body is required."
+                    });
+                }
+
+                await _emailService.SendEmailAsync(
+                    ToEmail,
+                    Subject,
+                    Body
+                );
+
+                return Ok(new
+                {
+                    Status = 1,
+                    Message = "Mail sent successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = 0,
+                    Message = $"Error sending mail: {ex.Message}"
+                });
+            }
+        }
 
         // =========================================
         // 2. Get Ticket By ID
@@ -155,7 +221,7 @@ namespace RMCERPAPI.Controllers
         // 4. Assign Ticket
         // =========================================
         [HttpPut]
-        [Authorize(Roles = "Admin,Support Executive")]
+        [Authorize(Roles = "Admin")]
         public IActionResult AssignTicket(
         decimal TicketID,
         decimal AssignedTo,
@@ -301,7 +367,33 @@ namespace RMCERPAPI.Controllers
             }
         }
 
+        // =========================================
+        //  GetTicketAssignmentHistory
+        // =========================================
+        [HttpGet]
+        public IActionResult GetTicketAssignmentHistory(decimal TicketID)
+        {
+            try
+            {
+                var data =
+                    _ticketRepository.GetTicketAssignmentHistory(TicketID);
 
+                return Ok(new
+                {
+                    Data = data,
+                    Status = 1,
+                    Message = "Ticket assignment history fetched successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = 0,
+                    Message = $"Error fetching assignment history: {ex.Message}"
+                });
+            }
+        }
         // =========================================
         // 7. Get Categories
         // =========================================

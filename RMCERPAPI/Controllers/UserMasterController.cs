@@ -338,5 +338,34 @@ namespace RMCERPAPI.Controllers
                 });
             }
         }
+
+        // =========================================================
+        // GET ACTIVE SUPPORT EXECUTIVES
+        // =========================================================
+        [Authorize]
+        [HttpGet]
+        public IActionResult GetSupportExecutives()
+        {
+            try
+            {
+                var data =
+                    _userMasterRepository.GetSupportExecutives();
+
+                return Ok(new
+                {
+                    Data = data,
+                    Status = 1,
+                    Message = "Support executive list fetched successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = 0,
+                    Message = $"Error fetching support executives: {ex.Message}"
+                });
+            }
+        }
     }
 }

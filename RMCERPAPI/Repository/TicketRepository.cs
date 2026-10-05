@@ -74,7 +74,7 @@ namespace RMCERPAPI.Repository
                     CategoryID = model.CategoryID,
                     Priority = model.Priority,
                     CreatedBy = model.CreatedBy,
-
+                    CreatedDate = model.CreatedDate,
                     CompanyName = model.CompanyName,
                     ContactPerson = model.ContactPerson,
                     ContactNo = model.ContactNo,
@@ -337,13 +337,13 @@ namespace RMCERPAPI.Repository
         // Ticket Performance Report Data
         // =========================================================
 
-    public List<dynamic> GetTicketPerformanceReport(
-    DateTime? FromDate,
-    DateTime? ToDate,
-    string Status,
-    string Priority,
-    string AssignedToName)
-        {
+          public List<dynamic> GetTicketPerformanceReport(
+          DateTime? FromDate,
+          DateTime? ToDate,
+          string Status,
+          string Priority,
+          string AssignedToName)
+          {
             using (IDbConnection connection = OpenConnection())
             {
                 string sql = "ProcReportTicketPerformance";
@@ -355,6 +355,30 @@ namespace RMCERPAPI.Repository
                     Status = Status,
                     Priority = Priority,
                     AssignedToName = AssignedToName
+                };
+
+                return connection.Query(
+                    sql,
+                    param,
+                    null,
+                    true,
+                    2000,
+                    CommandType.StoredProcedure
+                ).ToList();
+            }
+          }
+
+        // 6.1 Get Ticket Assignment History
+        public List<dynamic> GetTicketAssignmentHistory(decimal TicketID)
+        {
+            using (IDbConnection connection = OpenConnection())
+            {
+                string sql = "ProcTicketMaster";
+
+                var param = new
+                {
+                    PrcType = 11,
+                    TicketID = TicketID
                 };
 
                 return connection.Query(

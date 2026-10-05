@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using RMCERPAPI.Repository;
+using RMCERPAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -75,6 +76,7 @@ namespace RMCERPAPI
             services.AddScoped<UserMasterRepository>();
             services.AddScoped<TicketRepository>();
             services.AddScoped<DashboardRepository>();
+            services.AddScoped<EmailService>();
 
             services.AddSwaggerGen(c =>
             {
