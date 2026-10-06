@@ -394,6 +394,98 @@ namespace RMCERPAPI.Controllers
                 });
             }
         }
+
+        // =========================================
+        // GetTicketPriorityHistory
+        // =========================================
+        [HttpGet]
+        [Authorize(Roles = "Admin,Support Executive,User")]
+        public IActionResult GetTicketPriorityHistory(decimal TicketID)
+        {
+            try
+            {
+                var data =
+                    _ticketRepository.GetTicketPriorityHistory(TicketID);
+
+                return Ok(new
+                {
+                    Data = data,
+                    Status = 1,
+                    Message = "Ticket priority history fetched successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = 0,
+                    Message = $"Error fetching priority history: {ex.Message}"
+                });
+            }
+        }
+
+        // =========================================
+        // Add Ticket Comment
+        // =========================================
+        [HttpPost]
+        [Authorize(Roles = "Admin,Support Executive,User")]
+        public IActionResult AddTicketComment(
+            decimal TicketID,
+            string Comment,
+            decimal CommentedBy)
+        {
+            try
+            {
+                if (TicketID <= 0)
+                {
+                    return BadRequest(new
+                    {
+                        Status = 0,
+                        Message = "Invalid TicketID."
+                    });
+                }
+
+                if (string.IsNullOrWhiteSpace(Comment))
+                {
+                    return BadRequest(new
+                    {
+                        Status = 0,
+                        Message = "Comment is required."
+                    });
+                }
+
+                if (CommentedBy <= 0)
+                {
+                    return BadRequest(new
+                    {
+                        Status = 0,
+                        Message = "Invalid CommentedBy."
+                    });
+                }
+
+                var data = _ticketRepository.AddTicketComment(
+                    TicketID,
+                    Comment,
+                    CommentedBy
+                );
+
+                return Ok(new
+                {
+                    Data = data,
+                    Status = 1,
+                    Message = "Comment added successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = 0,
+                    Message = $"Error adding comment: {ex.Message}"
+                });
+            }
+        }
+
         // =========================================
         // 7. Get Categories
         // =========================================

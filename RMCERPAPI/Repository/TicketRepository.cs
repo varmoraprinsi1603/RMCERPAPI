@@ -248,7 +248,7 @@ namespace RMCERPAPI.Repository
                     Description = model.Description,
                     CategoryID = model.CategoryID,
                     Priority = model.Priority,
-
+                    ChangedBy = model.ChangedBy,
                     CompanyName = model.CompanyName,
                     ContactPerson = model.ContactPerson,
                     ContactNo = model.ContactNo,
@@ -389,6 +389,58 @@ namespace RMCERPAPI.Repository
                     2000,
                     CommandType.StoredProcedure
                 ).ToList();
+            }
+        }
+
+        public List<dynamic> GetTicketPriorityHistory(decimal TicketID)
+        {
+            using (IDbConnection connection = OpenConnection())
+            {
+                string sql = "ProcTicketMaster";
+
+                var param = new
+                {
+                    PrcType = 12,
+                    TicketID = TicketID
+                };
+
+                return connection
+                    .Query(
+                        sql,
+                        param,
+                        null,
+                        true,
+                        2000,
+                        CommandType.StoredProcedure
+                    )
+                    .ToList();
+            }
+        }
+
+    public dynamic AddTicketComment(
+    decimal TicketID,
+    string Comment,
+    decimal CommentedBy)
+        {
+            using (IDbConnection connection = OpenConnection())
+            {
+                string sql = "ProcTicketMaster";
+
+                var param = new
+                {
+                    PrcType = 13,
+                    TicketID = TicketID,
+                    Remarks = Comment,
+                    ChangedBy = CommentedBy
+                };
+
+                return connection.QueryFirstOrDefault(
+                    sql,
+                    param,
+                    null,
+                    2000,
+                    CommandType.StoredProcedure
+                );
             }
         }
     }

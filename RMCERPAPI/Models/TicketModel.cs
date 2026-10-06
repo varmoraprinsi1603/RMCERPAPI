@@ -50,8 +50,9 @@ namespace RMCERPAPI.Models
 
         public string Priority { get; set; }
 
-        public DateTime? CreatedDate { get; set; }
+        public decimal? ChangedBy { get; set; }
 
+        public DateTime? CreatedDate { get; set; }
         public string Status { get; set; }
 
         public decimal? AssignedTo { get; set; }
