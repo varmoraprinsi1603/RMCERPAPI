@@ -1,0 +1,29 @@
+Ticket Escalation hota kya hai?
+Maan le kisi customer ki company ka ticket aaya hai ki invoice generate nahi ho raha.
+
+Step 1: Customer ticket raise karta hai
+Ticket: TKT-013 · Priority: High
+High priority ki SLA deadline 8 hours hai.
+
+
+
+
+Step 2: SLA time khatam ho gaya
+Support team ne ticket resolve nahi kiya aur deadline cross ho gayi.
+SLA Status: SLA Breached
+
+
+
+
+Step 3: Ticket Escalation
+Ab ticket ko ek separate Escalated Tickets section mein dikhaya jayega, taaki Admin ya Senior Support ko pata chale ki is ticket par urgent attention chahiye.
+
+
+
+Tere project mein kya banana hai?
+Meri recommendation hai ki hum ye 3 cheezein banayein:
+1. Escalated Tickets section — normal ticket list se alag.
+2. Automatic identification — SLA cross ho chuki ho aur ticket abhi Resolved ya Closed na ho, toh woh escalation list mein aaye.
+3. Important details — Ticket No, Company Name, Priority, Assigned To, SLA Due Date aur Status.
+Example: Agar TKT-013 ki deadline nikal gayi aur ticket abhi bhi Open hai, toh woh Escalated Tickets mein dikhega. Agar ticket resolve ho gaya hai, toh usko active escalation mein nahi dikhayenge.
+Ek important baat: Escalation ka matlab sirf SLA Breached ka red badge dikhana nahi hai. Is requirement mein overdue ticket ko Admin/Senior Support ke liye alag se visible banana hai. Automatic assignment ya email notification tabhi add karenge agar requirement mein chahiye.

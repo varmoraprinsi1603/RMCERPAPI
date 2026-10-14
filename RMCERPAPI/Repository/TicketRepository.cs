@@ -32,6 +32,81 @@ namespace RMCERPAPI.Repository
             }
         }
 
+    
+        // Get Escalated Tickets
+        public List<TicketModel> GetEscalatedTickets()
+        {
+            using (IDbConnection connection = OpenConnection())
+            {
+                string sql = "ProcTicketMaster";
+
+                var param = new
+                {
+                    PrcType = 15
+                };
+
+                return connection.Query<TicketModel>(
+                    sql,
+                    param,
+                    null,
+                    true,
+                    2000,
+                    CommandType.StoredProcedure
+                ).ToList();
+            }
+        }
+
+
+
+        public List<TicketModel> GetTicketListPaged(
+            string ticketNo,
+            string status,
+            string priority,
+            decimal? categoryID,
+            decimal? assignedTo,
+            DateTime? fromDate,
+            DateTime? toDate,
+            int pageNumber,
+            int pageSize,
+            decimal currentUserID,
+            string userRole,
+            out int totalRecords)
+        {
+            using (IDbConnection connection = OpenConnection())
+            {
+                var param = new
+                {
+                    PrcType = 16,
+                    TicketNo = ticketNo,
+                    Status = status,
+                    Priority = priority,
+                    CategoryID = categoryID,
+                    AssignedTo = assignedTo,
+                    FromDate = fromDate,
+                    ToDate = toDate,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+
+                    // Logged-in user details
+                    CurrentUserID = currentUserID,
+                    CurrentUserRole = userRole
+                };
+
+                using (var multi = connection.QueryMultiple(
+                    "ProcTicketMaster",
+                    param,
+                    commandType: CommandType.StoredProcedure))
+                {
+                    totalRecords = multi.Read<int>().FirstOrDefault();
+
+                    List<TicketModel> tickets =
+                        multi.Read<TicketModel>().ToList();
+
+                    return tickets;
+                }
+            }
+        }
+
 
         // 2. Get Ticket By ID
         public TicketModel GetTicketByID(decimal TicketID)
@@ -417,11 +492,11 @@ namespace RMCERPAPI.Repository
             }
         }
 
-    public dynamic AddTicketComment(
-    decimal TicketID,
-    string Comment,
-    decimal CommentedBy)
-        {
+         public dynamic AddTicketComment(
+         decimal TicketID,
+         string Comment,
+         decimal CommentedBy)
+         {
             using (IDbConnection connection = OpenConnection())
             {
                 string sql = "ProcTicketMaster";
@@ -441,6 +516,30 @@ namespace RMCERPAPI.Repository
                     2000,
                     CommandType.StoredProcedure
                 );
+            }
+         }
+
+
+        public List<dynamic> GetTicketCommentHistory(decimal TicketID)
+        {
+            using (IDbConnection connection = OpenConnection())
+            {
+                string sql = "ProcTicketMaster";
+
+                var param = new
+                {
+                    PrcType = 14,
+                    TicketID = TicketID
+                };
+
+                return connection.Query(
+                    sql,
+                    param,
+                    null,
+                    true,
+                    2000,
+                    CommandType.StoredProcedure
+                ).ToList();
             }
         }
     }

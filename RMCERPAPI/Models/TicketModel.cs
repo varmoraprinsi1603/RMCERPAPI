@@ -14,6 +14,7 @@ namespace RMCERPAPI.Models
             CategoryName = "";
             Priority = "";
             CreatedDate = DateTime.Now;
+            SLADueDate = null;
             Status = "Open";
             AssignedTo = 0;
             AssignedToName = "";
@@ -53,6 +54,8 @@ namespace RMCERPAPI.Models
         public decimal? ChangedBy { get; set; }
 
         public DateTime? CreatedDate { get; set; }
+
+        public DateTime? SLADueDate { get; set; }
         public string Status { get; set; }
 
         public decimal? AssignedTo { get; set; }

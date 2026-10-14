@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using RMCERPAPI.Services;
 using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace RMCERPAPI.Controllers
 {
@@ -53,6 +54,119 @@ namespace RMCERPAPI.Controllers
             }
         }
 
+
+        [HttpGet]
+        public IActionResult GetTicketListPaged(
+            string ticketNo = null,
+            string status = null,
+            string priority = null,
+            decimal? categoryID = null,
+            decimal? assignedTo = null,
+            DateTime? fromDate = null,
+            DateTime? toDate = null,
+            int pageNumber = 1,
+            int pageSize = 10)
+        {
+            try
+            {
+
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+                if (!decimal.TryParse(userIdClaim, out decimal currentUserID) ||
+                    string.IsNullOrWhiteSpace(userRole))
+                {
+                    return Unauthorized(new
+                    {
+                        Status = 0,
+                        Message = "Invalid user identity."
+                    });
+                }
+
+
+                pageNumber = pageNumber < 1 ? 1 : pageNumber;
+                pageSize = pageSize < 1 ? 10 : pageSize;
+                pageSize = pageSize > 100 ? 100 : pageSize;
+
+                if (fromDate.HasValue && toDate.HasValue &&
+                    fromDate.Value.Date > toDate.Value.Date)
+                {
+                    return BadRequest(new
+                    {
+                        Status = 0,
+                        Message = "From Date cannot be greater than To Date."
+                    });
+                }
+
+                int totalRecords;
+
+                    var data = _ticketRepository.GetTicketListPaged(
+                    ticketNo,
+                    status,
+                    priority,
+                    categoryID,
+                    assignedTo,
+                    fromDate,
+                    toDate,
+                    pageNumber,
+                    pageSize,
+                    currentUserID,
+                    userRole,
+                    out totalRecords
+                );
+
+
+                return Ok(new
+                {
+                    Data = data,
+                    TotalRecords = totalRecords,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(
+                        (double)totalRecords / pageSize
+                    ),
+                    Status = 1,
+                    Message = "Ticket list fetched successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = 0,
+                    Message = $"Error fetching ticket list: {ex.Message}"
+                });
+            }
+        }
+
+        // =========================================
+        // Get Escalated Tickets
+        // =========================================
+
+        [HttpGet]
+        [Authorize(Roles = "Admin,Senior Support")]
+        public IActionResult GetEscalatedTickets()
+        {
+            try
+            {
+                var data = _ticketRepository.GetEscalatedTickets();
+
+                return Ok(new
+                {
+                    Data = data,
+                    Status = 1,
+                    Message = "Escalated tickets fetched successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = 0,
+                    Message = $"Error fetching escalated tickets: {ex.Message}"
+                });
+            }
+        }
 
         // =========================================
         // Send Ticket Mail
@@ -486,6 +600,41 @@ namespace RMCERPAPI.Controllers
             }
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin,Support Executive,User")]
+        public IActionResult GetTicketCommentHistory(decimal TicketID)
+        {
+            try
+            {
+                if (TicketID <= 0)
+                {
+                    return BadRequest(new
+                    {
+                        Status = 0,
+                        Message = "Invalid TicketID."
+                    });
+                }
+
+                var data =
+                    _ticketRepository.GetTicketCommentHistory(TicketID);
+
+                return Ok(new
+                {
+                    Data = data,
+                    Status = 1,
+                    Message = "Ticket comments fetched successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = 0,
+                    Message = $"Error fetching ticket comments: {ex.Message}"
+                });
+            }
+        }
+
         // =========================================
         // 7. Get Categories
         // =========================================
@@ -721,7 +870,7 @@ namespace RMCERPAPI.Controllers
         // =========================================================
         [HttpGet]
         [Authorize(Roles = "Admin,Support Executive,User")]
-        public IActionResult ExportTicketSummaryExcel(
+    public IActionResult ExportTicketSummaryExcel(
     DateTime? FromDate = null,
     DateTime? ToDate = null,
     string Status = null,
